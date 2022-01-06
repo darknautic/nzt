@@ -1,6 +1,9 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func Help() {
 	fmt.Println(`
@@ -14,24 +17,22 @@ func Help() {
  *	nzt <command> <arg>
  *
  * 	commands
- * 		- a, add <text>
+ * 		-a <text>
  *			add a note
- *
- *		- t, tags <tag-1 ...tag-n>
- *			space-separated list of tags
- *
- *		- l , list <config|tags|datafiles>
- *
- *		- s , shell
+ *		-t <tag-1 ...tag-n>
+ *			list of tags
+ *			Customize delimiter character with
+ *			i.e NZT_TAG_DELIMITER=","
+ *		-l <config|tags|datafiles>
+ *			list
+ *		-s
  *			get into interactive shell mode
+ *			subcommands :
+ *				- help
+ *				- exit
+ *		-h
+ *			display command help
  *
- *		- f , find
- *			shows notes whose labels match filter
- *
- *		- h , help
- *			display this message
- *
- *		- exit
  *
  * DESCRIPTION
  *
@@ -40,4 +41,5 @@ func Help() {
  *
  *
 	`)
+	os.Exit(0)
 }

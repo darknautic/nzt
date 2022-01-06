@@ -23,15 +23,11 @@ func Shell(config map[string]string) {
 			case "exit":
 				//Todo : What happen with CTRL+C ?
 				os.Exit(0)
-			case "save":
-				fmt.Println(" Persisting latest state...")
-				break
 			case "show":
-				fmt.Println(" Listing stored tags ...")
 				ShowConfig(config)
 				break
 			default:
-				fmt.Println(" Commad not found >" + cmd + "<")
+				fmt.Println(" Command not found >" + cmd + "<")
 				break
 			}
 		}

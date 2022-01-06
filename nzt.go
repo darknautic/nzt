@@ -2,50 +2,78 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	nztCommands "github.com/darknautic/nzt/commands"
 	"log"
 	"os"
+	"strings"
 )
 
-var NZT_HOME, ok = os.LookupEnv("NZT_HOME")
+var nztHome, isNztHomeSet = os.LookupEnv("NZT_HOME")
+var nztTagDelimiter, isNztTagDelimiterSet = os.LookupEnv("NZT_TAG_DELIMITER")
 
 var config = map[string]string{
-	"shellPrompt": "nzt > ",
-	"NZT_HOME":    NZT_HOME,
+	"shellPrompt":     "nzt > ",
+	"nztHome":         nztHome,
+	"nztTagDelimiter": nztTagDelimiter,
 }
 
 func main() {
 
-	addCmd := flag.NewFlagSet("add", flag.ExitOnError)
-	tagCmd := flag.NewFlagSet("tag", flag.ExitOnError)
-	shellFlag := flag.Bool("shell", false, "interactive shell")
+	if isNztHomeSet {
+		if len(os.Args) >= 2 {
 
-	if len(os.Args) == 2 {
-		flag.Parse()
-		isShellEnabled := *shellFlag
-		if isShellEnabled {
-			if !ok {
-				//TODO , assess to use a default directory in home/user/.nzt
-				log.Fatal("Environment variable NZT_HOME is not set")
-				os.Exit(0)
-			} else {
-				nztCommands.ShowConfig(config)
+			addFlag := flag.String("a", "", "Add a note")
+			getFlag := flag.String("g", "", "Get a note")
+			tagFlag := flag.String("t", "", "Tag(s)")
+			shellFlag := flag.Bool("s", false, "Interactive shell")
+
+			flag.Parse()
+
+			addNote := *addFlag
+			getNote := *getFlag
+			tags := *tagFlag
+			isShellFlag := *shellFlag
+
+			if isShellFlag {
 				nztCommands.Shell(config)
-			}
-		}
-		os.Exit(0)
-	}
 
-	if len(os.Args) < 4 {
-		fmt.Println("Expected required flags 'add' and 'tag' ")
+			} else {
+				tagList := []string{"NA"}
+				if len(tags) > 0 {
+					if nztTagDelimiter == " " {
+						tagIndex := 0
+						for i, n := range os.Args {
+							if n == "-t" {
+								tagIndex = i
+								break
+							}
+						}
+						tagList = os.Args[(tagIndex + 1):]
+
+					} else {
+						tagList = strings.Split(tags, nztTagDelimiter)
+					}
+				}
+
+				if len(addNote) > 0 {
+					nztCommands.AddNote(addNote, tagList)
+				} else {
+					if len(getNote) > 0 {
+						nztCommands.GetNote(getNote, tagList)
+					} else {
+						log.Fatal("No Add/Get option given.")
+					}
+				}
+
+			}
+
+		} else {
+			nztCommands.Help()
+		}
+
+	} else {
+		log.Fatal("Environment variable NZT_HOME is not set")
 		os.Exit(1)
 	}
-
-	addCmd.Parse(os.Args[2:3])
-	tagCmd.Parse(os.Args[4:])
-
-	fmt.Println("adding ->", addCmd.Args())
-	fmt.Println("tags -> ", tagCmd.Args())
 
 }
